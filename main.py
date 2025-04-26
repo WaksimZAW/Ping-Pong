@@ -39,6 +39,19 @@ class Player(GameSprite):
         if keys[self.key_down] and self.rect.y < win_size[1] - self.size[1] - 5:
             self.rect.y += self.speed
 
+
+# Класс для мяча
+class Ball(GameSprite):
+    def __init__(self, img, x, y, size, speed, speed_x, speed_y):
+        super().__init__(img, x, y, size, speed)
+        self.speed_x= speed_x
+        self.speed_y= speed_y
+
+    def update(self):
+        self.rect.x += self.speed_x
+        self.rect.y += self.speed_y
+
+
 #Настройка игровой сцены
 win_size = (700, 500)
 window = display.set_mode(win_size)
@@ -57,12 +70,15 @@ racket_img = "racket.png"
 player_1 = Player(racket_img, 30, 200, (40, 140), 4, K_UP, K_DOWN)
 player_2 = Player(racket_img, 620, 200, (40, 140), 4, K_w, K_s)
 
+#Создание мяча
+ball_img = "ball.png"
+ball = Ball(ball_img, 300, 300, (40, 40), 0, 3, 3)
 # Надписи игры
 font.init()
 my_font = font.SysFont("verdana", 24)
 endgame_font = font.SysFont("verdana", 76)
-lose_1 = endgame("Игрок 1 проиграл!", True, (180, 0, 0))
-lose_2 = endgame("Игрок 2 проиграл!", True, (180, 0, 0))
+lose_1 = endgame_font.render("Игрок 1 проиграл!", True, (180, 0, 0))
+lose_2 = endgame_font.render("Игрок 2 проиграл!", True, (180, 0, 0))
 
 
 #Игровой цикл
@@ -76,9 +92,11 @@ while game:
 
         player_1.update()
         player_2.update()
+        ball.update()
 
         player_1.reset()
         player_2.reset()
+        ball.reset()
 
     display.update()
     clock.tick(FPS)
