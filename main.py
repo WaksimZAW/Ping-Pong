@@ -53,8 +53,16 @@ clock = time.Clock()
 FPS = 60
 racket_img = "racket.png"
 
+#Создание игроков
 player_1 = Player(racket_img, 30, 200, (40, 140), 4, K_UP, K_DOWN)
 player_2 = Player(racket_img, 620, 200, (40, 140), 4, K_w, K_s)
+
+# Надписи игры
+font.init()
+my_font = font.SysFont("verdana", 24)
+endgame_font = font.SysFont("verdana", 76)
+lose_1 = endgame("Игрок 1 проиграл!", True, (180, 0, 0))
+lose_2 = endgame("Игрок 2 проиграл!", True, (180, 0, 0))
 
 
 #Игровой цикл
