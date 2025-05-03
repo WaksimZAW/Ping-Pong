@@ -73,6 +73,7 @@ FPS = 60
 racket_img = "racket.png"
 score_1 = 0
 score_2 = 0
+max_score = 2
 
 #Создание игроков
 player_1 = Player(racket_img, 30, 200, (40, 140), 4, K_w, K_s )
@@ -84,10 +85,10 @@ ball = Ball(ball_img, 300, 300, (40, 40), 0, 3, 3)
 # Надписи игры
 font.init()
 my_font = font.SysFont("verdana", 20, bold = True)
-endgame_font = font.SysFont("verdana", 76)
-lose_1 = endgame_font.render("Игрок 1 проиграл!", True, (180, 0, 0))
-lose_2 = endgame_font.render("Игрок 2 проиграл!", True, (180, 0, 0))
-goal_font = font.SysFont("verdana", 20)
+endgame_font = font.SysFont("verdana", 40)
+win_1 = endgame_font.render("Игрок 1 победил!", True, (0, 180, 60))
+win_2 = endgame_font.render("Игрок 2 победил!", True, (0, 180, 60))
+goal_font = font.SysFont("verdana", 30)
 goal_1 = goal_font.render("Игрок 1 забивает!", True, (0, 0, 255))
 goal_2 = goal_font.render("Игрок 2 забивает!", True, (255, 0, 0))
 
@@ -116,14 +117,20 @@ while game:
         #Система гола
         if ball.rect.x < 0:
             finish = True
-            window.blit(goal_2, (200, 200))
             score_2 += 1
+            if score_2 >= max_score:
+                window.blit(win_2, (180, 200))
+            else:
+                window.blit(goal_2, (210, 200))
 
         if ball.rect.x > win_size[0] - 50:
             finish = True
-            window.blit(goal_1, (200, 200))
             score_1 += 1
-
+            if score_1 >= max_score:
+                window.blit(win_1, (180, 200))
+            else:
+                window.blit(goal_1, (210, 200))
+            
 
         player_1.update()
         player_2.update()
@@ -132,6 +139,11 @@ while game:
         player_1.reset()
         player_2.reset()
         ball.reset()
+    else:
+        ball = Ball(ball_img, 300, 300, (40, 40), 0, 3, 3)
+        if not score_1 >= max_score and not score_2 >= max_score:
+            finish = False
+            time.delay(2000)
 
     display.update()
     clock.tick(FPS)
