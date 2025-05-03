@@ -75,8 +75,8 @@ score_1 = 0
 score_2 = 0
 
 #Создание игроков
-player_1 = Player(racket_img, 30, 200, (40, 140), 4, K_UP, K_DOWN)
-player_2 = Player(racket_img, 620, 200, (40, 140), 4, K_w, K_s)
+player_1 = Player(racket_img, 30, 200, (40, 140), 4, K_w, K_s )
+player_2 = Player(racket_img, 620, 200, (40, 140), 4, K_UP, K_DOWN)
 
 #Создание мяча
 ball_img = "ball.png"
@@ -104,6 +104,25 @@ while game:
         score_2_text = my_font.render(f"Счёт 2: {score_2}", True, (0, 0 , 0))
         window.blit(score_1_text, (10, 15))
         window.blit(score_2_text, (win_size[0]-115, 15))
+
+        # Отскок от верхней и нижней границ
+        if ball.rect.y < 0 or ball.rect.y > win_size[1]-50:
+            ball.bounce_y()
+
+        #Отскок от ракеток
+        if sprite.collide_rect(ball, player_1) or sprite.collide_rect(ball, player_2):
+            ball.bounce_x()
+
+        #Система гола
+        if ball.rect.x < 0:
+            finish = True
+            window.blit(goal_2, (200, 200))
+            score_2 += 1
+
+        if ball.rect.x > win_size[0] - 50:
+            finish = True
+            window.blit(goal_1, (200, 200))
+            score_1 += 1
 
 
         player_1.update()
