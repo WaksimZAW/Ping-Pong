@@ -46,18 +46,49 @@ class Ball(GameSprite):
         super().__init__(img, x, y, size, speed)
         self.speed_x= speed_x
         self.speed_y= speed_y
+        self.max_speed = speed_x * 4
+        self.start_pos = (x, y)
+        self.start_speed_x = speed_x
+        self.start_speed_y = speed_y
 
     def update(self):
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
 
-    def bounce_x(self):
+    def bounce_x(self, player = None):
         kick_sound.play()
         self.speed_x *= -1
+        #Если передали игрока, делаем более реалистичный отскок
+        if player:
+            #Находим, в какую часть ракетки попал мяч
+            player_center = player.rect.y + player.rect.height/2
+            ball_center = self.rect.y + self.rect.height/2
+
+            # находим относительную точку удара
+            # < 0 = верх ракетки
+            # 0 = середина ракетки
+            # > 0 = низ ракетки
+            relative_kick = (ball_center - player_center) / (player.rect.height/2)            
+
+            # Меняем скорость по Y
+            self.speed_y = relative_kick * 5
+
+            #Немного ускоряем мяч при каждом отскоке
+            if abs(self.speed_x) < self.max_speed:
+                self.speed_x *= 1.1
 
     def bounce_y(self):
         kick_sound.play()
         self.speed_y *= -1
+
+    def reset_ball(self):
+        self.rect.x = self.start_pos[0]
+        self.rect.y = self.start_pos[1]
+        self.speed_x = self.start_speed_x
+        self.speed_y = self.start_speed_y
+
+
+
 
 
 #Настройка игровой сцены
@@ -75,7 +106,7 @@ FPS = 60
 racket_img = "racket.png"
 score_1 = 0
 score_2 = 0
-max_score = 2
+max_score = 5
 
 #Создание игроков
 player_1 = Player(racket_img, 30, 200, (40, 140), 4, K_w, K_s )
@@ -120,9 +151,41 @@ while game:
         if ball.rect.y < 0 or ball.rect.y > win_size[1]-50:
             ball.bounce_y()
 
-        #Отскок от ракеток
-        if sprite.collide_rect(ball, player_1) or sprite.collide_rect(ball, player_2):
-            ball.bounce_x()
+        #Отскок от ракетки 1
+        if sprite.collide_rect(ball, player_1):
+            # Проверяем, с какой стороны произошло столкновение
+
+            #Мяч слева от ракетки - обычный отскок
+            if ball.rect.left < player_1.rect.right:
+                ball.rect.left = player_1.rect.right + 1 #Предотвращаем застревание
+                ball.bounce_x(player_1)
+            #Мяч попал сверху или снизу
+            else:
+                # Попал сверху
+                if ball.rect.centery < player_1.rect.centery:
+                    ball.rect.bottom = player_1.rect.top - 1 #Свдигаем вверх
+                #Попал снизу
+                else:
+                    ball.rect.bottom = player_1.rect.top + 1 #Свдигаем вниз
+                ball.bounce_y()
+        
+        # Отскок от ракетки 2
+        if sprite.collide_rect(ball, player_2):
+            # Проверяем, с какой стороны произошло столкновение
+
+            #Мяч справа от ракетки - обычный отскок
+            if ball.rect.right > player_2.rect.left:
+                ball.rect.right = player_2.rect.left + 1 #Предотвращаем застревание
+                ball.bounce_x(player_2)
+            #Мяч попал сверху или снизу
+            else:
+                # Попал сверху
+                if ball.rect.centery < player_2.rect.centery:
+                    ball.rect.bottom = player_2.rect.top - 1 #Свдигаем вверх
+                #Попал снизу
+                else:
+                    ball.rect.bottom = player_2.rect.top + 1 #Свдигаем вниз
+                ball.bounce_y()
 
         #Система гола
         if ball.rect.x < 0:
@@ -152,7 +215,7 @@ while game:
         player_2.reset()
         ball.reset()
     else:
-        ball = Ball(ball_img, 300, 300, (40, 40), 0, 3, 3)
+        ball.reset_ball()
         if not score_1 >= max_score and not score_2 >= max_score:
             finish = False
             time.delay(3000)
