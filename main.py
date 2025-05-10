@@ -26,8 +26,8 @@ class GameSprite(sprite.Sprite):
 
 #Класс для игрока, двойное наследование
 class Player(GameSprite):
-    def __init__(self, img, x, y, size, speed, key_up, key_down):
-        super().__init__(img, x, y, size, speed)
+    def __init__(self, img, playerx, playery, size, speed, key_up, key_down):
+        super().__init__(img, playerx, playery, size, speed)
         self.key_up = key_up
         self.key_down = key_down
 
@@ -52,9 +52,11 @@ class Ball(GameSprite):
         self.rect.y += self.speed_y
 
     def bounce_x(self):
+        kick_sound.play()
         self.speed_x *= -1
 
     def bounce_y(self):
+        kick_sound.play()
         self.speed_y *= -1
 
 
@@ -92,6 +94,14 @@ goal_font = font.SysFont("verdana", 30)
 goal_1 = goal_font.render("Игрок 1 забивает!", True, (0, 0, 255))
 goal_2 = goal_font.render("Игрок 2 забивает!", True, (255, 0, 0))
 
+# Звуки игры
+mixer.init()
+back_sound = "soccer-stadium.mp3"
+mixer.music.load(back_sound)
+mixer.music.set_volume(0.2) #громкость
+mixer.music.play()
+kick_sound = mixer.Sound("soccer-kick.ogg")
+goal_sound = mixer.Sound("soccer-goal.ogg")
 
 #Игровой цикл
 while game:
@@ -116,6 +126,7 @@ while game:
 
         #Система гола
         if ball.rect.x < 0:
+            goal_sound.play(maxtime=3500)
             finish = True
             score_2 += 1
             if score_2 >= max_score:
@@ -124,6 +135,7 @@ while game:
                 window.blit(goal_2, (210, 200))
 
         if ball.rect.x > win_size[0] - 50:
+            goal_sound.play(maxtime=3500)
             finish = True
             score_1 += 1
             if score_1 >= max_score:
@@ -143,7 +155,7 @@ while game:
         ball = Ball(ball_img, 300, 300, (40, 40), 0, 3, 3)
         if not score_1 >= max_score and not score_2 >= max_score:
             finish = False
-            time.delay(2000)
+            time.delay(3000)
 
     display.update()
     clock.tick(FPS)
