@@ -148,7 +148,13 @@ while game:
         window.blit(score_2_text, (win_size[0]-115, 15))
 
         # Отскок от верхней и нижней границ
-        if ball.rect.y < 0 or ball.rect.y > win_size[1]-50:
+        if ball.rect.y <= 0 :
+            #Если мяч ушёл за верхнюю границу - смещаем его вниз
+            ball.rect.y = 1
+            ball.bounce_y()
+        elif ball.rect.y >= win_size[1] - ball.rect.height:
+            #Если мяч ушёл за нижнюю границу - смещаем его ввверх
+            ball.rect.y = win_size[1] - ball.rect.height - 1
             ball.bounce_y()
 
         #Отскок от ракетки 1
