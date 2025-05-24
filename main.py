@@ -39,6 +39,29 @@ class Player(GameSprite):
         if keys[self.key_down] and self.rect.y < win_size[1] - self.size[1] - 5:
             self.rect.y += self.speed
 
+    def update_ai(self, ball):
+        # Ракетка следует за мячом с небольшой задержкой
+        # Если мяч движется в сторону ИИ (слева направо)
+        if ball.speed_x > 0:
+            # Предсказываем, где будет мяч
+            target_y = ball.rect.y
+            #Добавляем случайную погрешность
+            target_y += randint(-30, 30)
+
+        else:
+            target_y = win_size[1] // 2 - self.rect.height // 2
+
+        if target_y < 5:
+            target_y = 5
+        if target_y > win_size[1] - self.rect.height - 5:
+            target_y = win_size[1] - self.rect.height - 5
+
+        #Если ракетка выше цели (мячик с погрешностью)
+        if self.rect.y < target_y:
+            self.rect.y += min(self.speed, target_y - self.rect.y)
+        #Если ракетка ниже цели (мячика с погрешностью)
+        elif self.rect.y > target_y:
+            self.rect.y -= min(self.speed, self.rect.y - target_y)
 
 # Класс для мяча
 class Ball(GameSprite):
@@ -142,12 +165,18 @@ ball = Ball(ball_img, 300, 300, (40, 40), 0, 3, 3)
 # Надписи игры
 font.init()
 my_font = font.SysFont("verdana", 20, bold = True)
+
 endgame_font = font.SysFont("verdana", 40)
 win_1 = endgame_font.render("Игрок 1 победил!", True, (0, 180, 60))
 win_2 = endgame_font.render("Игрок 2 победил!", True, (0, 180, 60))
+
 goal_font = font.SysFont("verdana", 30)
 goal_1 = goal_font.render("Игрок 1 забивает!", True, (0, 0, 255))
 goal_2 = goal_font.render("Игрок 2 забивает!", True, (255, 0, 0))
+
+title_font = font.SysFont("verdana", 50, bold = True)
+title = title_font.render("Пинг-понг", True, (0, 0, 0))
+controls = my_font.render("Игрока 1 - W/S, Игрок 2 - UP/DOWN", True, (27, 27, 27))
 
 # Звуки игры
 mixer.init()
@@ -198,6 +227,10 @@ while game:
 
     if current_mode == MENU:
         window.blit(background, (0, 0))
+        window.blit(title, (win_size[0] // 2 - title.get_width() // 2, 40))
+        window.blit(controls, (win_size[0] // 2 - controls.get_width() // 2, 100))
+
+
         # Обновляем цвет кнопок при наведении мышки
         btn_2_players.check_hover(mouse.get_pos())
         btn_vs_ai.check_hover(mouse.get_pos())
@@ -282,7 +315,10 @@ while game:
                 
 
             player_1.update()
-            player_2.update()
+            if current_mode == GAME_VS_AI:
+                player_2.update_ai(ball)
+            elif current_mode == GAME_2_PLAYERS:          
+                player_2.update()
             ball.update()
 
             player_1.reset()
